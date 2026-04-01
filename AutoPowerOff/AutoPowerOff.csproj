@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWindowsForms>true</UseWindowsForms>
+    <AssemblyName>AutoPowerOff</AssemblyName>
+    <RootNamespace>AutoPowerOff</RootNamespace>
+    <Version>1.0.0</Version>
+  </PropertyGroup>
+  <!-- 若同目录下有 poweroff.ico，则用作 exe 图标 -->
+  <PropertyGroup Condition="Exists('$(MSBuildProjectDirectory)\poweroff.ico')">
+    <ApplicationIcon>poweroff.ico</ApplicationIcon>
+  </PropertyGroup>
+</Project>
