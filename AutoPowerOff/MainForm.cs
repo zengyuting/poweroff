@@ -20,9 +20,9 @@ internal sealed class MainForm : Form
         Text = "自动关机";
         FormBorderStyle = FormBorderStyle.FixedDialog;
         MaximizeBox = false;
-        MinimizeBox = true;
+        MinimizeBox = false;
         StartPosition = FormStartPosition.CenterScreen;
-        ClientSize = new Size(380, 228);
+        ClientSize = new Size(380, 278);
         ShowInTaskbar = true;
 
         var exeIcon = Icon.ExtractAssociatedIcon(Application.ExecutablePath);
@@ -65,21 +65,34 @@ internal sealed class MainForm : Form
         var lnkHelp = new LinkLabel
         {
             AutoSize = true,
-            Location = new Point(12, 118),
+            Location = new Point(12, 116),
             Text = "关机说明",
         };
         lnkHelp.LinkClicked += (_, _) => ShowShutdownHelp(this);
 
+        var lblTrayHint = new Label
+        {
+            AutoSize = false,
+            Location = new Point(12, 148),
+            Size = new Size(356, 72),
+            Text =
+                "提示：点击窗口右上角 × 将隐藏到系统托盘（不会退出）。\r\n" +
+                "定时关机须保持本程序在托盘中运行。\r\n" +
+                "到点若检测到约 90 秒内仍有键鼠操作，会先询问是否关机；长时间无操作则直接温和关机。",
+            ForeColor = SystemColors.GrayText,
+        };
+
         _btnSave = new Button
         {
             Text = "保存",
-            Location = new Point(268, 172),
+            Location = new Point(268, 232),
             Size = new Size(96, 34),
             MinimumSize = new Size(96, 34),
         };
         _btnSave.Click += (_, _) => SaveFromUi();
 
-        Controls.AddRange(new Control[] { lblTime, _timePicker, _chkEnabled, _chkStartup, lnkHelp, _btnSave });
+        // lblTrayHint 先于 lnkHelp，且二者竖向错开，避免灰色提示盖住「关机说明」链接
+        Controls.AddRange(new Control[] { lblTime, _timePicker, _chkEnabled, _chkStartup, lblTrayHint, lnkHelp, _btnSave });
 
         _trayMenu = new ContextMenuStrip();
         _trayMenu.Items.Add("打开设置", null, (_, _) => ShowFromTray());
@@ -123,7 +136,7 @@ internal sealed class MainForm : Form
             // 忽略注册表错误
         }
 
-        _shutdownService = new ShutdownService(_config);
+        _shutdownService = new ShutdownService(_config, this);
         _shutdownService.UpdateConfig(_config);
 
         if (isFirstRun)
@@ -131,7 +144,7 @@ internal sealed class MainForm : Form
             _notifyIcon.ShowBalloonTip(
                 5000,
                 "自动关机",
-                "请保持本程序在系统托盘运行，到点才会执行关机。",
+                "点击 × 会隐藏到托盘。请保持本程序在托盘中，定时关机才会生效。",
                 ToolTipIcon.Info);
         }
     }
@@ -184,6 +197,9 @@ internal sealed class MainForm : Form
             "• /s：正常关机（非休眠）。\r\n" +
             "• /t 60：约 60 秒后关机，期间 Windows 会提示注销；多数程序可先保存并自行退出。\r\n" +
             "• 未使用 /f：不强制结束进程，有利于减少数据未保存、下次开机异常修复等情况。\r\n\r\n" +
+            "定时关机前的工作检测：\r\n" +
+            "若到点时发现您约 90 秒内仍有鼠标或键盘操作，会先弹出对话框询问是否仍要关机；" +
+            "选「否」将跳过当天的自动关机（次日仍按设定时间执行）。若长时间无键鼠输入，则直接按温和方式关机。\r\n\r\n" +
             "请注意：\r\n" +
             "若有程序无响应或拒绝退出，关机可能会被推迟或弹出「程序正在阻止关机」；" +
             "您可在系统界面选择仍要关机或结束对应程序。\r\n\r\n" +

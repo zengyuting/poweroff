@@ -8,6 +8,8 @@
     <AssemblyName>AutoPowerOff</AssemblyName>
     <RootNamespace>AutoPowerOff</RootNamespace>
     <Version>1.0.0</Version>
+    <!-- 单文件发布时压缩嵌入的程序集，可明显减小 exe 体积（首次运行仍会解压到临时目录） -->
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
   </PropertyGroup>
   <!-- 若同目录下有 poweroff.ico，则用作 exe 图标 -->
   <PropertyGroup Condition="Exists('$(MSBuildProjectDirectory)\poweroff.ico')">
